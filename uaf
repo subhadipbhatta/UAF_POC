@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# UAF CLI launcher
+# Usage:  ./uaf
+#         ./uaf --help    (passes args through to uaf_cli.py)
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$SCRIPT_DIR/uaf_cli.py" "$@"
