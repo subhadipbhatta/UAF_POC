@@ -16,3 +16,4 @@ screenshots/*
 # Logs / deps
 *.log
 node_modules/
+.venv/

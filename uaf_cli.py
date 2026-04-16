@@ -8,30 +8,12 @@ Usage:
     ./uaf
 """
 
-# ── Dependency bootstrap (must run before other imports) ──────────────────
-import subprocess
-import sys
-
-def _bootstrap():
-    missing = []
-    for pkg in ("questionary", "rich"):
-        try:
-            __import__(pkg)
-        except ImportError:
-            missing.append(pkg)
-    if missing:
-        print(f"Installing required packages: {', '.join(missing)} ...")
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install"] + missing,
-            stdout=subprocess.DEVNULL,
-        )
-
-_bootstrap()
-
 # ── Standard library ──────────────────────────────────────────────────────
 import json
 import os
 import shutil
+import subprocess
+import sys
 import textwrap
 from pathlib import Path
 

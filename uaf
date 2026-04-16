@@ -1,11 +1,29 @@
 #!/usr/bin/env bash
 # UAF CLI launcher
 # Usage:  ./uaf
-#         ./uaf --help    (passes args through to uaf_cli.py)
 set -euo pipefail
 
 # Ensure the nvm-managed node bin (where claude lives) is on PATH
 export PATH="/Users/Shub_Bhattacharyya/.nvm/versions/node/v24.13.0/bin:$PATH"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec python3 "$SCRIPT_DIR/uaf_cli.py" "$@"
+VENV_DIR="$SCRIPT_DIR/.venv"
+
+# Create virtual environment if it doesn't exist
+if [ ! -f "$VENV_DIR/bin/python" ]; then
+    echo "Setting up virtual environment..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+VENV_PYTHON="$VENV_DIR/bin/python"
+VENV_PIP="$VENV_DIR/bin/pip"
+
+# Install/upgrade dependencies into the venv if needed
+if [ ! -f "$VENV_DIR/.deps_installed" ] || \
+   [ "$SCRIPT_DIR/requirements.txt" -nt "$VENV_DIR/.deps_installed" ]; then
+    echo "Installing dependencies..."
+    "$VENV_PIP" install -q -r "$SCRIPT_DIR/requirements.txt"
+    touch "$VENV_DIR/.deps_installed"
+fi
+
+exec "$VENV_PYTHON" "$SCRIPT_DIR/uaf_cli.py" "$@"
