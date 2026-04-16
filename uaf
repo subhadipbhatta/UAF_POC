@@ -3,5 +3,9 @@
 # Usage:  ./uaf
 #         ./uaf --help    (passes args through to uaf_cli.py)
 set -euo pipefail
+
+# Ensure the nvm-managed node bin (where claude lives) is on PATH
+export PATH="/Users/Shub_Bhattacharyya/.nvm/versions/node/v24.13.0/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 exec python3 "$SCRIPT_DIR/uaf_cli.py" "$@"

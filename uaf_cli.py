@@ -116,8 +116,18 @@ def save_config(cfg: dict) -> None:
 
 # ── Claude subprocess runner ──────────────────────────────────────────────
 
-def _claude_available() -> bool:
-    return shutil.which("claude") is not None
+# Known fallback path for the claude CLI (nvm-managed install)
+_CLAUDE_FALLBACK = Path.home() / ".nvm/versions/node/v24.13.0/bin/claude"
+
+
+def _claude_bin() -> str | None:
+    """Return the path to the claude binary, checking PATH then the known fallback."""
+    found = shutil.which("claude")
+    if found:
+        return found
+    if _CLAUDE_FALLBACK.exists():
+        return str(_CLAUDE_FALLBACK)
+    return None
 
 
 def run_claude(prompt: str, agent_label: str) -> int:
@@ -131,14 +141,16 @@ def run_claude(prompt: str, agent_label: str) -> int:
 
     Returns the process exit code.
     """
-    if not _claude_available():
+    claude = _claude_bin()
+    if not claude:
         console.print(
-            "[bold red]Error:[/bold red] `claude` CLI not found in PATH.\n"
-            "Install Claude Code from https://claude.ai/code and ensure it is in your PATH."
+            "[bold red]Error:[/bold red] `claude` CLI not found.\n"
+            "Expected at: ~/.nvm/versions/node/v24.13.0/bin/claude\n"
+            "Install Claude Code from https://claude.ai/code"
         )
         return 1
 
-    cmd = ["claude", "-p", prompt, "--dangerously-skip-permissions"]
+    cmd = [claude, "-p", prompt, "--dangerously-skip-permissions"]
 
     console.print()
     console.print(Panel(
@@ -625,9 +637,10 @@ def print_banner() -> None:
     ))
     console.print()
 
-    if not _claude_available():
+    if not _claude_bin():
         console.print(Panel(
-            "[bold red]Warning:[/bold red] `claude` CLI not found in PATH.\n"
+            "[bold red]Warning:[/bold red] `claude` CLI not found.\n"
+            "Expected at: ~/.nvm/versions/node/v24.13.0/bin/claude\n"
             "Agents will not run until Claude Code is installed.\n"
             "Install from: https://claude.ai/code",
             border_style="red",
